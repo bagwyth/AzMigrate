@@ -1,0 +1,35 @@
+{
+    "properties": {
+      "azureLocation": "NorthEurope",
+      "azureOfferCode": "MSAZR0003P",
+      "azurePricingTier": "Standard",
+      "azureStorageRedundancy": "LocallyRedundant",
+      "scalingFactor": 1,
+      "percentile": "Percentile95",
+      "sizeTypeForCostEstimate": null,
+      "timeRange": "Day",
+      "currency": "EUR",
+      "azureHybridUseBenefit": "Yes",
+      "discountPercentage": 10,
+      "type": "Microsoft.Migrate/assessmentprojects/groups/assessments",
+      "sizingCriterion": "AsOnPremises",
+      "azureVmFamilies": [
+        "Dv2_series",
+        "F_series",
+        "Dv3_series",
+        "DSv2_series",
+        "Fs_series",
+        "Dsv3_series",
+        "Ev3_series",
+        "Esv3_series",
+        "Fsv2_series"
+      ],
+      "azureDiskType": "Premium",
+      "vmUptime": {
+        "daysPerMonth": 31,
+        "hoursPerDay": 24
+      },
+      "reservedInstance": "None"
+    },
+    "eTag": "\"02004e47-0000-1000-0000-5d652d870000\""
+  }

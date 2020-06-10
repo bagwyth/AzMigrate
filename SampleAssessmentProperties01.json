@@ -1,0 +1,40 @@
+{
+    "properties": {
+      "azureLocation": "uksouth",
+      "azurePricingTier": "Standard",
+      "azureStorageRedundancy": "LocallyRedundant",
+      "scalingFactor": 1,
+      "percentile": "Percentile95",
+      "sizeTypeForCostEstimate": "RecommendedSize",
+      "timeRange": "Custom",
+      "perfDataStartTime": "2020-06-02T00:00:00.000000Z",
+      "perfDataEndTime": "2020-06-08T00:00:00.000000Z",
+      "currency": "USD",
+      "azureHybridUseBenefit": "Yes",
+      "discountPercentage": 0,
+      "sizingCriterion": "PerformanceBased",
+      "azureDiskType": "StandardOrPremium",
+      "eaSubscriptionId": null,
+      "azureVmFamilies": [
+        "Dv2_series",
+        "F_series",
+        "Dv3_series",
+        "DSv2_series",
+        "Fs_series",
+        "Dsv3_series",
+        "Ev3_series",
+        "Esv3_series",
+        "Fsv2_series",
+        "M_series",
+        "Ls_series",
+        "H_series"
+      ],
+      "vmUptime": {
+        "daysPerMonth": 31,
+        "hoursPerDay": 24
+      },
+      "azureOfferCode": "MSAZR0003P",
+      "reservedInstance": "RI3Year"
+    },
+    "eTag": "*"
+  }
