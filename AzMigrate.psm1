@@ -180,6 +180,50 @@ function Get-AzureMigrateVMWareSiteVMs {
 
 <#
 .SYNOPSIS
+Returns high-level details of assessments from the specified Azure Migrate project.
+.DESCRIPTION
+The Get-AzureMigrateAssessments cmdlet returns high-level details of assessments from the specified Azure Migrate project.
+.PARAMETER SubscriptionID
+Specifies the Azure subscription to query.
+.PARAMETER ResourceGroup
+Specifies the resoruce group containing the Azure Migrate project.
+.PARAMETER Project
+Specifies the Azure Migrate project to query.
+.EXAMPLE
+Get all assessments for the specified Azure Migrate project.
+PS C:\>Get-AzureMigrateAssessments -Token $token -Project xx
+
+.NOTES
+TBD:
+1. Return object with more meaningful properties (i.e. extract info from .properties and populate top-level object as appropriate).
+2. Handle case of empty project.
+3. Handle caes of 1 discovered machine.
+#>
+function Get-AzureMigrateAssessments {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/assessments?api-version=2019-05-01&pageSize=1000" -f $SubscriptionID, $ResourceGroup, $Project
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $response.value
+
+}
+
+
+<#
+.SYNOPSIS
 Sets state of agentless dependency mapping feature to enabled or disabled for one or more VMs.
 .DESCRIPTION
 The Set-AzureMigrateAgentlessDependencyMapping cmdlet enables or disables the dependency mapping feature for the specified set of VMs.
