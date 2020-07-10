@@ -81,7 +81,7 @@ $AzMigGroups = Get-AzureMigrateGroups -Token $token -SubscriptionID $subscriptio
 $AzMigGroups | Select-Object name, {$_.properties.machinecount}
 # Create assessments for the new group using our assessment templates
 $assessment01 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment01" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties01.json
-$assessment02 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties02.json 
+$assessment02 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties02.json
 
 # Get assessments for the project
 $assessments = Get-AzureMigrateAssessments -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name
@@ -90,6 +90,7 @@ $assessments |Select-Object name, @{Name='Type';Expression={$_.properties.sizing
 ```
 
 Steps to enable or disable the agentless dependency mapping feature for multiple machines programatically:
+
 ```powershell
 # Get all VMware Azure Migrate appliances from the resource group
 $AzureVMwaresite = Get-AzureMigrateVMWareSite -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg
@@ -98,7 +99,7 @@ $AzureVMwareSiteVMs = Get-AzureMigrateVMWareSiteVMs -Token $token -VMWareSite $A
 # Review the status of those VMware VMs returned
 $AzureVMwareSiteVMs | select {$_.properties.displayname},{$_.properties.dependencymapping}
 # Enable the dependency mapping feature for the 2nd VM returned - this can also accept a list of VMs to make enabling the feature at scale easier
-Set-AzureMigrateAgentlessDependencyMapping -Token $token -VMWareSite $AzureVMwaresite[0].id -VM $azureVMwareSiteVMs[1].id -DependencyMapping Enabled 
+Set-AzureMigrateAgentlessDependencyMapping -Token $token -VMWareSite $AzureVMwaresite[0].id -VM $azureVMwareSiteVMs[1].id -DependencyMapping Enabled
 ```
 
 ## Known Issues / Troubleshooting
@@ -120,9 +121,9 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 Microsoft and any contributors grant you a license to the Microsoft documentation and other content in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode), see the [LICENSE](LICENSE) file, and grant you a license to any code in the repository under the [MIT License](https://opensource.org/licenses/MIT), see the [LICENSE-CODE](LICENSE-CODE) file.
 
-Microsoft, Windows, Microsoft Azure and/or other Microsoft products and services referenced in the documentation may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries. The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks. Microsoft's general trademark guidelines can be found at http://go.microsoft.com/fwlink/?LinkID=254653.
+Microsoft, Windows, Microsoft Azure and/or other Microsoft products and services referenced in the documentation may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries. The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks. Microsoft's general trademark guidelines can be found at <http://go.microsoft.com/fwlink/?LinkID=254653>.
 
-Privacy information can be found at https://privacy.microsoft.com/en-us/
+Privacy information can be found at <https://privacy.microsoft.com/en-us/>
 
 Microsoft and any contributors reserve all others rights, whether under their respective copyrights, patents, or trademarks, whether by implication, estoppel or otherwise.
 
