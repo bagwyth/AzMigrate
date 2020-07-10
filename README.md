@@ -20,7 +20,6 @@ To use this module the following are required:
 3. **PowerShell Version:** It's strongly recommended you install the [latest version of PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) available for your operating system.
 4. **Azure PowerShell Module:** The module relies on basic [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps?view=azps-4.3.0) functionality to connect to your subscription. It checks for the presence of an up-to-date install of the standard Azure PowerShell module to do this.
 
-> [!NOTE]
 > Azure [Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/overview) is a convenient alternative to installing and maintaining the required software on a local machine.
 
 ### Download the Module
@@ -52,7 +51,7 @@ $subscriptionid = "<your subscription ID>"
 $rg = "<your resource group name>"
 ```
 
-> [!NOTE] If you're unsure what the subscription ID and resource group values should be, navigate to the Azure portal, browse to your Azure Migrate project, click through to server assessment and expand the "essentials" section. You'll see both listed there.
+> If you're unsure what the subscription ID and resource group values should be, navigate to the Azure portal, browse to your Azure Migrate project, click through to server assessment and expand the "essentials" section. You'll see both listed there.
 
 Connect to Azure using the credentials of your user account with access to the Azure Migrate project. Once successfully connected, ensure we're working in the context of the subscription which contains the Azure Migrate project:
 
