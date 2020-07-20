@@ -388,9 +388,9 @@ function Get-AzureMigrateGroups {
 
 <#
 .SYNOPSIS
-Add machines to an existing Azure Migrate group.
+Add or remove machines associated with an existing Azure Migrate group.
 .DESCRIPTION
-The Update-AzureMigrateGroup cmdlet adds machines to an existing Azure Migrate group.
+The Set-AzureMigrateGroup cmdlet adds or removes machines associated with an existing Azure Migrate group.
 .PARAMETER Token
 Specifies an authentication token to use when retrieving information from Azure.
 .PARAMETER SubscriptionID
@@ -401,11 +401,18 @@ The resource group containing the Azure Migrate project.
 The Azure Migrate project the group is in.
 .PARAMETER Group
 The ID of the group to add machines to.
-.PARAMETER MachinesToAdd
-A list of machines to add to the group.
+.PARAMETER Machines
+A list of machines to add or remove from the group.
+.PARAMETER Add
+Causes the function to add machines to the group.
+.PARAMETER Remove
+Causes the function to remove machines from the group.
 .EXAMPLE
-Create a new group named "HRApplication01"
-PS C:\>New-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -GroupName "HRApplication01"
+Add the machines VM01 and VM02 to the group named "HRApplication01"
+PS C:\>Set-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -GroupName "HRApplication01" -Machines VM01,VM02 -Add
+.EXAMPLE
+Remove the machine VM01 from the group named "HRApplication01"
+PS C:\>Set-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -GroupName "HRApplication01" -Machines VM01 -Remove
 
 .NOTES
 TBD:
@@ -413,7 +420,7 @@ TBD:
 2. Handle case of empty project.
 3. Handle caes of group name already in use.
 #>
-function Update-AzureMigrateGroup {
+function Set-AzureMigrateGroup {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true)][string]$Token,
@@ -421,7 +428,9 @@ function Update-AzureMigrateGroup {
         [Parameter(Mandatory = $true)][string]$ResourceGroup,
         [Parameter(Mandatory = $true)][string]$Project,
         [Parameter(Mandatory = $true)][string]$Group,
-        [Parameter(Mandatory = $true)][string[]]$MachinesToAdd
+        [Parameter(Mandatory = $true)][string[]]$Machines,
+        [Parameter(Mandatory = $true, ParameterSetName = "Add")][switch]$Add,
+        [Parameter(Mandatory = $true, ParameterSetName = "Remove")][switch]$Remove
     )
 
     #$obj = @()
@@ -431,25 +440,31 @@ function Update-AzureMigrateGroup {
     $headers.Add("Authorization", "Bearer $Token")
 
     $jsonPayload = @"
-{
-    "properties": {
-      "machines": [
-      ],
-      "operationType": "Add"
-    }
-  }
+    {
+        "properties": {
+          "machines": [
+          ],
+          "operationType": "Undefined"
+        }
+      }
 "@
 
     $jsonPayload = $jsonPayload | ConvertFrom-Json
 
-    $MachinesToAdd | ForEach-Object {
+    if($Add) {
+        $jsonPayload.properties.operationType = "Add"
+    }
+    if($Remove) {
+        $jsonPayload.properties.operationType = "Remove"
+    }
+
+    $Machines | ForEach-Object {
         $jsonPayload.properties.machines += $_
     }
 
     $jsonPayload = $jsonPayload | ConvertTo-Json
 
     Write-Debug $jsonPayload
-
 
     $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "POST" -Body $jsonPayload #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
@@ -473,7 +488,7 @@ The resource group containing the Azure Migrate project.
 .PARAMETER Project
 The Azure Migrate project the group is in.
 .PARAMETER Group
-The ID of the group to add machines to.
+The ID of the group containing machines to assess.
 .PARAMETER AssessmentName
 What to name the assessment being created
 .PARAMETER AssessmentProperties
@@ -509,6 +524,108 @@ function New-AzureMigrateAssessment {
     $jsonPayload = Get-Content $AssessmentProperties
 
     $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body $jsonPayload -Debug -Verbose
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $response
+
+}
+
+
+<#
+.SYNOPSIS
+Remove an Azure Migrate assessment.
+.DESCRIPTION
+The Remove-AzureMigrateAssessment cmdlet removes an Azure Migrate assessment.
+.PARAMETER Token
+Specifies an authentication token to use when retrieving information from Azure.
+.PARAMETER SubscriptionID
+The subscription the project resources are contained in.
+.PARAMETER ResourceGroup
+The resource group containing the Azure Migrate project.
+.PARAMETER Project
+The Azure Migrate project the group is in.
+.PARAMETER Group
+The ID of the group to the assessment is associated with.
+.PARAMETER AssessmentName
+Name of the Azure Migrate assessment to be removed.
+.EXAMPLE
+Remove the assessment "Assessment01"
+PS C:\>Remove-AzureMigrateAssessment -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -Group GG -Assessment WW
+
+.NOTES
+TBD:
+1. Return object with more meaningful properties (i.e. extract info from .properties and populate top-level object as appropriate).
+2. Handle case of empty project.
+3. Handle caes of group name already in use.
+#>
+function Remove-AzureMigrateAssessment {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $true)][string]$Group,
+        [Parameter(Mandatory = $true)][string]$AssessmentName
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/groups/{3}/assessments/{4}?api-version=2019-05-01" -f $SubscriptionID, $ResourceGroup, $Project, $Group, $AssessmentName
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "DELETE" -Verbose
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $response
+
+}
+
+
+<#
+.SYNOPSIS
+Remove an empty Azure Migrate group.
+.DESCRIPTION
+The Remove-AzureMigrateGroup cmdlet removes an Azure Migrate group.
+Note that any assessments or machines associated with the group will prevent this command from completing successfully.
+.PARAMETER Token
+Specifies an authentication token to use when retrieving information from Azure.
+.PARAMETER SubscriptionID
+The subscription the project resources are contained in.
+.PARAMETER ResourceGroup
+The resource group containing the Azure Migrate project.
+.PARAMETER Project
+The Azure Migrate project the group is in.
+.PARAMETER Group
+The ID of the group to remove.
+.EXAMPLE
+Remove the group "Group01"
+PS C:\>Remove-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -Group "Group01"
+
+.NOTES
+TBD:
+1. Return object with more meaningful properties (i.e. extract info from .properties and populate top-level object as appropriate).
+2. Handle case of empty project.
+3. Handle caes of group name already in use.
+#>
+function Remove-AzureMigrateGroup {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $true)][string]$Group
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/groups/{3}?api-version=2019-05-01" -f $SubscriptionID, $ResourceGroup, $Project, $Group
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "DELETE" -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
     return $response

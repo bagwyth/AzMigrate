@@ -75,7 +75,7 @@ $AzMigGroups | Select-Object name, {$_.properties.machinecount}
 # Create a new, empty group
 $newgroup = New-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -GroupName "TestGroup02"
 # Add machines to the new group
-$updatedGroup = Update-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -Group $newgroup.name -MachinesToAdd $discoveredmachines[4].id,$discoveredmachines[5].id -Debug
+$updatedGroup = Set-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -Group $newgroup.name -Machines $discoveredmachines[4].id,$discoveredmachines[5].id -Debug -Add
 # Re-run the Get-AzMigrateGroups command to get the updated list of groups and verify the new group was created and has machines added to it
 $AzMigGroups = Get-AzureMigrateGroups -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name
 $AzMigGroups | Select-Object name, {$_.properties.machinecount}
@@ -100,6 +100,20 @@ $AzureVMwareSiteVMs = Get-AzureMigrateVMWareSiteVMs -Token $token -VMWareSite $A
 $AzureVMwareSiteVMs | select {$_.properties.displayname},{$_.properties.dependencymapping}
 # Enable the dependency mapping feature for the 2nd VM returned - this can also accept a list of VMs to make enabling the feature at scale easier
 Set-AzureMigrateAgentlessDependencyMapping -Token $token -VMWareSite $AzureVMwaresite[0].id -VM $azureVMwareSiteVMs[1].id -DependencyMapping Enabled
+```
+
+Steps to remove an assessment, remove machines from a group, and remove a group
+
+```powershell
+# Remove an assessment
+Remove-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name
+Remove-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name
+
+# Remove machines from a group
+$updatedGroup = Set-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -Group $newgroup.name -Machines $discoveredmachines[3].id,$discoveredmachines[5].id -Remove
+
+# Remove an empty group
+Remove-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -Group $updatedGroup.name
 ```
 
 ## Known Issues / Troubleshooting
