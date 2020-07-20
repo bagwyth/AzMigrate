@@ -121,7 +121,7 @@ Remove-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -Resource
 - **Token lifetime is limited:** If you receive authentication issues re-run the Get-AzCachedAccessToken command to get a fresh token.
 - **Returned objects:** The objects returned by the various functions aren't very friendly. You typically have to explore the properties manually to determine which are useful.
 - **The number of results returned may be limited:** For example, the Get-AzureMigrateDiscoveredMachine may only return 50 machines at a time. We're working on enabling that to return more results.
-- **Assessment properties are opaque:** using
+- **Assessment properties are opaque:**
 
 ## Contributing
 
