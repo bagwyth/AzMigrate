@@ -72,6 +72,10 @@ $discoveredmachines | Select-Object {$_.properties.displayname}, {$_.properties.
 $AzMigGroups = Get-AzureMigrateGroups -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name
 # Review the list of groups returned
 $AzMigGroups | Select-Object name, {$_.properties.machinecount}
+# Get a list of machines associated with a specific group
+$group1discoveredmachines = Get-AzureMigrateDiscoveredMachine -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -GroupName $AzMigGroups[0].name
+# Review the output of the above command
+$group1discoveredmachines | Select-Object {$_.properties.displayname}, {$_.properties.megabytesofmemory}, {$_.properties.numberofcores}, {$_.properties.operatingsystemname}
 # Create a new, empty group
 $newgroup = New-AzureMigrateGroup -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -GroupName "TestGroup02"
 # Add machines to the new group

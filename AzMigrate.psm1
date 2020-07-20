@@ -52,7 +52,8 @@ function Get-AzureMigrateProject {
 .SYNOPSIS
 Returns all discovered machines within a specified Azure Migrate project.
 .DESCRIPTION
-The Get-AzMigrateDiscoveredMachins cmdlet returns all machines discovered within a specified Azure Migrate project.
+The Get-AzureMigrateDiscoveredMachine cmdlet returns all machines discovered within a specified Azure Migrate project.
+Adding the -GroupName parameter returns only machines associated with the specified Azure Migrate group.
 .PARAMETER Token
 Specifies an authentication token to use when retrieving information from Azure.
 .PARAMETER SubscriptionID
@@ -61,9 +62,14 @@ Specifies the Azure subscription to query.
 Specifies the resoruce group containing the Azure Migrate project.
 .PARAMETER Project
 Specifies the Azure Migrate project to query.
+.PARAMETER GroupName
+Name of an Azure Migrate group from which to return a list of machines
 .EXAMPLE
 Get all machines discovered within a specified Azure Migrate project.
-PS C:\>Get-AzureMigrateDiscoveredMachine -Token $token -SubscriptionID 45916f92-e9c3-4ed2-b8c2-d87aa129905f -ResourceGroup xx -Project xx
+PS C:\>Get-AzureMigrateDiscoveredMachine -Token $token -SubscriptionID SSID -ResourceGroup xx -Project xx
+.EXAMPLE
+Get machines discovered within a specified Azure Migrate project and associated with a specific group.
+PS C:\>Get-AzureMigrateDiscoveredMachine -Token $token -SubscriptionID SSID -ResourceGroup xx -Project xx -GroupName MyGroup01
 
 .NOTES
 TBD:
@@ -77,13 +83,16 @@ function Get-AzureMigrateDiscoveredMachine {
         [Parameter(Mandatory = $true)][string]$Token,
         [Parameter(Mandatory = $true)][string]$SubscriptionID,
         [Parameter(Mandatory = $true)][string]$ResourceGroup,
-        [Parameter(Mandatory = $true)][string]$Project
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $false)][string]$GroupName
     )
 
     #$obj = @()
     $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentProjects/{2}/machines?api-version=2019-10-01&pageSize=1000" -f $SubscriptionID, $ResourceGroup, $Project
-    #$url = "https://management.azure.com{0}/machines?api-version=2019-10-01&pageSize=1000" -f $Project
-    #/subscriptions/4d2e8de2-eea6-4697-8be1-e7338bb3f867/resourceGroups/RG-AzMigVMware01-EUWest/providers/Microsoft.Migrate/assessmentprojects/AzMig-VMware01-EUWesta731project/machines?api-version=2019-10-01&pageSize=1000"
+
+    if($GroupName) {
+        $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/machines?api-version=2019-05-01&pageSize=1000&%24filter=Properties/GroupName%20eq%20'{3}'"  -f $SubscriptionID, $ResourceGroup, $Project, $GroupName
+    }
 
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
@@ -355,7 +364,7 @@ The resource group containing the Azure Migrate project.
 The Azure Migrate project to create the group in.
 .EXAMPLE
 Get all groups for a specific project
-PS C:\>New-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ
+PS C:\>Get-AzureMigrateGroup -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ
 
 .NOTES
 TBD:
