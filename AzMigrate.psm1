@@ -88,10 +88,10 @@ function Get-AzureMigrateDiscoveredMachine {
     )
 
     #$obj = @()
-    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentProjects/{2}/machines?api-version=2019-10-01&pageSize=1000" -f $SubscriptionID, $ResourceGroup, $Project
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentProjects/{2}/machines?api-version=2019-05-01&pageSize=2000" -f $SubscriptionID, $ResourceGroup, $Project
 
     if($GroupName) {
-        $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/machines?api-version=2019-05-01&pageSize=1000&%24filter=Properties/GroupName%20eq%20'{3}'"  -f $SubscriptionID, $ResourceGroup, $Project, $GroupName
+        $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/machines?api-version=2019-05-01&pageSize=2000&%24filter=Properties/GroupName%20eq%20'{3}'"  -f $SubscriptionID, $ResourceGroup, $Project, $GroupName
     }
 
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
@@ -174,7 +174,7 @@ function Get-AzureMigrateVMWareSiteVMs {
     )
 
     #$obj = @()
-    $url = "https://management.azure.com{0}/machines?api-version=2020-01-01-preview&pageSize=1000" -f $VMWareSite
+    $url = "https://management.azure.com{0}/machines?api-version=2019-05-01-preview&pageSize=2000" -f $VMWareSite
 
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
