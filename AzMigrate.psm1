@@ -103,7 +103,52 @@ function Get-AzureMigrateDiscoveredMachine {
     return $response.value
 
 }
+<#
+.SYNOPSIS
+Returns details for all VM assessments
+.DESCRIPTION
+The Get-AzureMigrateAssessedMachines cmdlet returns high-level details of VM assessments from the specified Azure Migrate project.
+.PARAMETER SubscriptionID
+Specifies the Azure subscription to query.
+.PARAMETER ResourceGroup
+Specifies the resoruce group containing the Azure Migrate project.
+.PARAMETER Project
+Specifies the Azure Migrate project to query.
+.PARAMETER Group
+Specifies VM group to get assessment for
+.PARAMETER AssessmentName
+Specifices VM name of assessment
+.EXAMPLE
+Get all VM assessments for the specified Azure Migrate project and assessment and Group
+PS C:\>Get-AzureMigrateAssessments -Token $token -Project xx -Subscription xx -ResourceGroup xx -Group xx - AssessmentName xx
 
+.NOTES
+TBD:
+
+#>
+function Get-AzureMigrateAssessedMachines {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $true)][string]$Group,
+        [Parameter(Mandatory = $true)][string]$AssessmentName
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/groups/{3}/assessments/{4}/assessedMachines?api-version=2019-10-01" -f $SubscriptionID, $ResourceGroup, $Project, $Group, $AssessmentName
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $response.value
+
+}
 
 <#
 .SYNOPSIS
