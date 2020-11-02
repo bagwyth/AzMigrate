@@ -87,10 +87,15 @@ $AzMigGroups | Select-Object name, {$_.properties.machinecount}
 $assessment01 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment01" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties01.json
 $assessment02 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties02.json
 
-# Get assessments for the project
+# Get a summary of assessments for the project
 $assessments = Get-AzureMigrateAssessments -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name
-# Review details of assessments returned
-$assessments |Select-Object name, @{Name='Type';Expression={$_.properties.sizingcriterion}}, @{Name='Suitability';Expression={$_.properties.suitabilitysummary}}, @{Name='Monthly Cost';Expression={$_.properties.monthlycomputecost + $_.properties.monthlystoragecost + $_.properties.monthlyPremiumStorageCost + $_properties.monthlyStandardSSDStorageCost}}
+# Review summary of assessments returned
+$assessments |Select-Object name, @{Name='Type';Expression={$_.properties.sizingcriterion}}, {$_.properties.status}
+# Get detailed assessment output for machines in a group assessed against a specific assessment
+$assessedmachines = Get-AzureMigrateAssessedMachine -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -GroupName $AzMigGroups[5].name -AssessmentName $assessments[10].name
+# Summarise details of assessed machines
+$assessedmachines | Select-Object {$_.properties.displayname}, {$_.properties.operatingsystemname}, {$_.properties.suitability}, {$_.properties.recommendedSize}
+
 ```
 
 Steps to enable or disable the agentless dependency mapping feature for multiple machines programatically:
