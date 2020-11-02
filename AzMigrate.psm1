@@ -1,11 +1,11 @@
 Set-StrictMode -Version latest
 <#
-    © 2020 Microsoft Corporation. All rights reserved. This sample code is not supported under any Microsoft standard support program or service. 
-    This sample code is provided AS IS without warranty of any kind. Microsoft disclaims all implied warranties including, without limitation, 
-    any implied warranties of merchantability or of fitness for a particular purpose. The entire risk arising out of the use or performance 
-    of the sample code and documentation remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation, 
-    production, or delivery of the scripts be liable for any damages whatsoever (including, without limitation, damages for loss of business 
-    profits, business interruption, loss of business information, or other pecuniary loss) arising out of the use of or inability to use the 
+    © 2020 Microsoft Corporation. All rights reserved. This sample code is not supported under any Microsoft standard support program or service.
+    This sample code is provided AS IS without warranty of any kind. Microsoft disclaims all implied warranties including, without limitation,
+    any implied warranties of merchantability or of fitness for a particular purpose. The entire risk arising out of the use or performance
+    of the sample code and documentation remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation,
+    production, or delivery of the scripts be liable for any damages whatsoever (including, without limitation, damages for loss of business
+    profits, business interruption, loss of business information, or other pecuniary loss) arising out of the use of or inability to use the
     sample scripts or documentation, even if Microsoft has been advised of the possibility of such damages.
 #>
 
@@ -97,7 +97,59 @@ function Get-AzureMigrateDiscoveredMachine {
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
 
-    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" -Debug -Verbose
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $response.value
+
+}
+
+
+<#
+.SYNOPSIS
+Returns details of machines assessed within a group by a specific assessment.
+.DESCRIPTION
+The Get-AzureMigrateAssessedMachine cmdlet returns details of machines assessed against a specific assessment within a specified Azure Migrate group.
+.PARAMETER Token
+Specifies an authentication token to use when retrieving information from Azure.
+.PARAMETER SubscriptionID
+Specifies the Azure subscription to query.
+.PARAMETER ResourceGroup
+Specifies the resoruce group containing the Azure Migrate project.
+.PARAMETER Project
+Specifies the Azure Migrate project to query.
+.PARAMETER GroupName
+Name of an Azure Migrate group from which to return a list of machines.
+.PARAMETER AssessmentName
+The name of the specific assessment for which to retrieve results from.
+.EXAMPLE
+Get all machines assessed against the assessment "assessment01" within the group "group01".
+PS C:\>Get-AzureMigrateAssessedMachine -Token $token -SubscriptionID SSID -ResourceGroup xx -Project xx -GroupName group01 -AssessmentName assessment01
+
+.NOTES
+TBD:
+1. Return object with more meaningful properties (i.e. extract info from .properties and populate top-level object as appropriate).
+2. Handle case of empty project.
+3. Handle caes of 1 discovered machine.
+#>
+function Get-AzureMigrateAssessedMachine {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $true)][string]$GroupName,
+        [Parameter(Mandatory = $true)][string]$AssessmentName
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentProjects/{2}/groups/{3}/assessments/{4}/assessedMachines/?api-version=2019-05-01&pageSize=2000" -f $SubscriptionID, $ResourceGroup, $Project, $GroupName, $AssessmentName
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" # -Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
     return $response.value
@@ -218,7 +270,7 @@ function Get-AzureMigrateAssessments {
     )
 
     #$obj = @()
-    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/assessments?api-version=2019-05-01&pageSize=1000" -f $SubscriptionID, $ResourceGroup, $Project
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/assessmentsSummary/default?api-version=2020-05-01-preview" -f $SubscriptionID, $ResourceGroup, $Project
 
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
@@ -226,7 +278,7 @@ function Get-AzureMigrateAssessments {
     $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
-    return $response.value
+    return $response.properties.assessments
 
 }
 
@@ -292,7 +344,7 @@ $jsonPayload = @"
 
     #$jsonPayload = [System.Text.Encoding]::UTF8.GetBytes($jsonPayload)
 
-    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "POST" -Body $jsonPayload -Debug -Verbose
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "POST" -Body $jsonPayload #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
     return $response
@@ -532,7 +584,7 @@ function New-AzureMigrateAssessment {
 
     $jsonPayload = Get-Content $AssessmentProperties
 
-    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body $jsonPayload -Debug -Verbose
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body $jsonPayload #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
     return $response
