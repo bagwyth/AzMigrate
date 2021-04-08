@@ -87,21 +87,22 @@ function Get-AzureMigrateDiscoveredMachine {
         [Parameter(Mandatory = $false)][string]$GroupName
     )
 
-    #$obj = @()
+    $obj = @()
     $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentProjects/{2}/machines?api-version=2019-05-01&pageSize=2000" -f $SubscriptionID, $ResourceGroup, $Project
-
     if($GroupName) {
         $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/machines?api-version=2019-05-01&pageSize=2000&%24filter=Properties/GroupName%20eq%20'{3}'"  -f $SubscriptionID, $ResourceGroup, $Project, $GroupName
     }
-
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
-
-    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
-    #$obj += $response.Substring(1) | ConvertFrom-Json
-    #return (_formatResult -obj $obj -type "AzureMigrateProject")
-    return $response.value
-
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET"# -Debug -Verbose
+    $obj = $obj + $response.value
+    while ($response.nextlink) {
+        $newresponse = Invoke-RestMethod -Uri $response.nextLink -Headers $headers -ContentType "application/json" -Method "GET" #-Debug -Verbose
+        $response = $newresponse
+        $obj = $obj + $response.value
+        clear-variable newresponse
+    }
+    return $obj
 }
 
 
