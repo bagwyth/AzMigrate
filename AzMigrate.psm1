@@ -283,6 +283,48 @@ function Get-AzureMigrateAssessments {
 
 }
 
+<#
+.SYNOPSIS
+Returns details of assessments, including costs from the specified Azure Migrate project.
+.DESCRIPTION
+The Get-AzureMigrateAssessmentsDetailed cmdlet returns details of assessments from the specified Azure Migrate project.
+.PARAMETER SubscriptionID
+Specifies the Azure subscription to query.
+.PARAMETER ResourceGroup
+Specifies the resoruce group containing the Azure Migrate project.
+.PARAMETER Project
+Specifies the Azure Migrate project to query.
+
+.EXAMPLE
+Get all assessments for the specified Azure Migrate project.
+PS C:\>Get-AzureMigrateAssessmentsDetailed -Token $token -Project xx
+
+.NOTES
+TBD:
+1. Return object with more meaningful properties (i.e. extract info from .properties and populate top-level object as appropriate).
+2. Handle case of empty project.
+3. Handle caes of 1 discovered machine.
+#>
+function Get-AzureMigrateAssessmentsDetailed
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project
+    )
+
+
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/assessments?api-version=2020-05-01-preview" -f $SubscriptionID, $ResourceGroup, $Project
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "GET"
+
+    return $response.value
+}
 
 <#
 .SYNOPSIS
@@ -555,9 +597,16 @@ The ID of the group containing machines to assess.
 What to name the assessment being created
 .PARAMETER AssessmentProperties
 json file containing properties for the assessment being created.
+Cannot be combied with AssessmentPropertiesString parameter.
+.PARAMETER AssessmentPropertiesString
+json string containing properties for the assessment being created.
+Cannot be combied with AssessmentProperties parameter.
 .EXAMPLE
 Create a new assessment named "Assessment01"
 PS C:\>New-AzureMigrateAssessment -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -AssessmentName "Assessment01" -AssessmentProperties .\SampleAssessmentProperties01.json
+
+Create a new assessment named "Assessment02" using JSON String for assessment properties
+PS C:\>New-AzureMigrateAssessment -Token $token -SubscriptionID XX -ResourceGroup YY -Project ZZ -AssessmentName "Assessment01" -AssessmentPropertiesString "{...}"
 
 .NOTES
 TBD:
@@ -574,7 +623,8 @@ function New-AzureMigrateAssessment {
         [Parameter(Mandatory = $true)][string]$Project,
         [Parameter(Mandatory = $true)][string]$Group,
         [Parameter(Mandatory = $true)][string]$AssessmentName,
-        [Parameter(Mandatory = $true)][string]$AssessmentProperties
+        [Parameter(Mandatory = $true, ParameterSetName = 'JSONFile')][string]$AssessmentProperties,
+        [Parameter(Mandatory = $true, ParameterSetName = 'JSONString')][string]$AssessmentPropertiesString
     )
 
     #$obj = @()
@@ -583,7 +633,18 @@ function New-AzureMigrateAssessment {
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
 
-    $jsonPayload = Get-Content $AssessmentProperties
+    switch ($PSCmdlet.ParameterSetName) {
+        'JSONFile'
+        {
+            $jsonPayload = Get-Content $AssessmentProperties
+            break
+        }
+        'JSONString'
+        {
+            $jsonPayload = $AssessmentPropertiesString
+            break
+        }
+    }
 
     $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body $jsonPayload #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
