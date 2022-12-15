@@ -285,6 +285,53 @@ function Get-AzureMigrateAssessments {
 
 <#
 .SYNOPSIS
+Downloads the excel export of a specified assessment.
+.DESCRIPTION
+The Get-AzureMigrateAssessmentExport cmdlet downloads excel export of a specified assessment.
+.PARAMETER SubscriptionID
+Specifies the Azure subscription to query.
+.PARAMETER ResourceGroup
+Specifies the resoruce group containing the Azure Migrate project.
+.PARAMETER Project
+Specifies the Azure Migrate project to query.
+.PARAMETER GroupName
+Specifies the group name in the project.
+.PARAMETER AssessmentName
+Specifies the assessment name in the group.
+.EXAMPLE
+Download excel report for the specified assessment.
+PS C:\>Get-AzureMigrateAssessmentExport -Token $token -Project xx -SubscriptionID xx -ResourceGroup xx -GroupName "myGroup" -AssessmentName "myFirstAssessment"
+
+#>
+function Get-AzureMigrateAssessmentExport {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$SubscriptionID,
+        [Parameter(Mandatory = $true)][string]$ResourceGroup,
+        [Parameter(Mandatory = $true)][string]$Project,
+        [Parameter(Mandatory = $true)][string]$GroupName,
+        [Parameter(Mandatory = $true)][string]$AssessmentName,
+        [Parameter(Mandatory = $true)][string]$Filename
+    )
+
+    #$obj = @()
+    $url = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Migrate/assessmentprojects/{2}/groups/{3}/assessments/{4}/downloadUrl?api-version=2019-05-01" -f $SubscriptionID, $ResourceGroup, $Project, $GroupName, $AssessmentName
+
+    $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
+    $headers.Add("Authorization", "Bearer $Token")
+
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "POST" #-Debug -Verbose
+
+    $downloadresponse = Invoke-WebRequest -uri $response.assessmentReportUrl -OutFile $Filename -PassThru
+
+    #$obj += $response.Substring(1) | ConvertFrom-Json
+    #return (_formatResult -obj $obj -type "AzureMigrateProject")
+    return $downloadresponse.StatusCode
+}
+
+<#
+.SYNOPSIS
 Returns details of assessments, including costs from the specified Azure Migrate project.
 .DESCRIPTION
 The Get-AzureMigrateAssessmentsDetailed cmdlet returns details of assessments from the specified Azure Migrate project.
