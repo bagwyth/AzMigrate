@@ -394,7 +394,7 @@ function New-AzureMigrateGroup {
     $headers = New-Object 'System.Collections.Generic.Dictionary[[string],[string]]'
     $headers.Add("Authorization", "Bearer $Token")
 
-    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body "{'groupType': 'Default'}" #-Debug -Verbose
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -ContentType "application/json" -Method "PUT" -Body "{'properties': {'groupType': 'Default'}}" #-Debug -Verbose
     #$obj += $response.Substring(1) | ConvertFrom-Json
     #return (_formatResult -obj $obj -type "AzureMigrateProject")
     return $response
@@ -504,9 +504,9 @@ function Set-AzureMigrateGroup {
     $jsonPayload = @"
     {
         "properties": {
-          "machines": [
-          ],
-          "operationType": "Undefined"
+            "machines": [
+            ],
+            "operationType": "Undefined"
         }
       }
 "@
