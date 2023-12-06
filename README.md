@@ -86,6 +86,7 @@ $AzMigGroups | Select-Object name, {$_.properties.machinecount}
 # Create assessments for the new group using our assessment templates
 $assessment01 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment01" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties01.json
 $assessment02 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment02" -Group $updatedGroup.name -AssessmentProperties .\SampleAssessmentProperties02.json
+$assessment03 = New-AzureMigrateAssessment -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -AssessmentName "Assessment03" -Group $updatedGroup.name -AssessmentPropertiesString "{assessment properties as json string}"
 
 # Get a summary of assessments for the project
 $assessments = Get-AzureMigrateAssessments -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name
@@ -95,6 +96,10 @@ $assessments |Select-Object name, @{Name='Type';Expression={$_.properties.sizing
 $assessedmachines = Get-AzureMigrateAssessedMachine -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name -GroupName $AzMigGroups[5].name -AssessmentName $assessments[10].name
 # Summarise details of assessed machines
 $assessedmachines | Select-Object {$_.properties.displayname}, {$_.properties.operatingsystemname}, {$_.properties.suitability}, {$_.properties.recommendedSize}
+
+# Alternative solution: Get all assessments including details for the project
+$Assessments = Get-AzureMigrateAssessmentsDetailed -Token $token -SubscriptionID $subscriptionid -ResourceGroup $rg -Project $projects[0].name   
+
 
 ```
 
